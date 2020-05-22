@@ -306,6 +306,49 @@ $.getJSON("data/DOITT_MUSEUM_01_13SEPT2010.geojson", function (data) {
   museums.addData(data);
 });
 
+/* Empty layer placeholder to add to layer control for listening when to add/remove theaters to markerClusters layer */
+var gpLayer = L.geoJson(null);
+var gp = L.geoJson(null, {
+  pointToLayer: function (feature, latlng) {
+    return L.marker(latlng, {
+      icon: L.icon({
+        iconUrl: "assets/img/theater.png",
+        iconSize: [24, 28],
+        iconAnchor: [12, 28],
+        popupAnchor: [0, -25]
+      }),
+      title: feature.properties.nameua_new,
+      riseOnHover: true
+    });
+  },
+  onEachFeature: function (feature, layer) {
+    if (feature.properties) {
+      var content = "<table class='table table-striped table-bordered table-condensed'>" + "<tr><th>Name</th><td>" + feature.properties.nameua_new + "</td></tr>" + "<tr><th>Phone</th><td>" + feature.properties.codename + "</td></tr>" + "<tr><th>Address</th><td>" + feature.properties.year_gp + "</td></tr><table>";
+      layer.on({
+        click: function (e) {
+          $("#feature-title").html(feature.properties.nameua_new);
+          $("#feature-info").html(content);
+          $("#featureModal").modal("show");
+          highlight.clearLayers().addLayer(L.circleMarker([feature.geometry.coordinates[1], feature.geometry.coordinates[0]], highlightStyle));
+        }
+      });
+      $("#feature-list tbody").append('<tr class="feature-row" id="' + L.stamp(layer) + '" lat="' + layer.getLatLng().lat + '" lng="' + layer.getLatLng().lng + '"><td style="vertical-align: middle;"><img width="16" height="18" src="assets/img/theater.png"></td><td class="feature-name">' + layer.feature.properties.nameua_new + '</td><td style="vertical-align: middle;"><i class="fa fa-chevron-right pull-right"></i></td></tr>');
+      theaterSearch.push({
+        name: layer.feature.properties.nameua_new,
+        address: layer.feature.properties.ADDRESS1,
+        source: "Theaters",
+        id: L.stamp(layer),
+        lat: layer.feature.geometry.coordinates[1],
+        lng: layer.feature.geometry.coordinates[0]
+      });
+    }
+  }
+});
+$.getJSON("data/GP_t.geojson", function (data) {
+  theaters.addData(data);
+  map.addLayer(gpLayer);
+});
+
 map = L.map("map", {
   zoom: 10,
   center: [40.702222, -73.979378],
