@@ -1,4 +1,4 @@
-var map, featureList, boroughSearch = [], theaterSearch = [], museumSearch = [];
+var map, featureList, gpSearch = [], boroughSearch = [], theaterSearch = [], museumSearch = [];
 
 $(window).resize(function() {
   sizeLayerControl();
@@ -96,6 +96,14 @@ function syncSidebar() {
     if (map.hasLayer(theaterLayer)) {
       if (map.getBounds().contains(layer.getLatLng())) {
         $("#feature-list tbody").append('<tr class="feature-row" id="' + L.stamp(layer) + '" lat="' + layer.getLatLng().lat + '" lng="' + layer.getLatLng().lng + '"><td style="vertical-align: middle;"><img width="16" height="18" src="assets/img/theater.png"></td><td class="feature-name">' + layer.feature.properties.NAME + '</td><td style="vertical-align: middle;"><i class="fa fa-chevron-right pull-right"></i></td></tr>');
+      }
+    }
+  });
+  /* Loop through gp layer and add only features which are in the map bounds */
+  gp.eachLayer(function (layer) {
+    if (map.hasLayer(gpLayer)) {
+      if (map.getBounds().contains(layer.getLatLng())) {
+        $("#feature-list tbody").append('<tr class="feature-row" id="' + L.stamp(layer) + '" lat="' + layer.getLatLng().lat + '" lng="' + layer.getLatLng().lng + '"><td style="vertical-align: middle;"><img width="16" height="18" src="assets/img/gp.png"></td><td class="feature-name">' + layer.feature.properties.NAME + '</td><td style="vertical-align: middle;"><i class="fa fa-chevron-right pull-right"></i></td></tr>');
       }
     }
   });
@@ -263,6 +271,87 @@ $.getJSON("data/DOITT_THEATER_01_13SEPT2010.geojson", function (data) {
   theaters.addData(data);
   map.addLayer(theaterLayer);
 });
+/*
+//Завантаження шарів з файлів geoJSON
+	var LeafIcon = L.Icon.extend({
+		options: {
+			iconSize:     [30, 40],
+			
+			popupAnchor:  [0, 0]
+		}
+	});
+	
+	var greenIcon = new LeafIcon({iconUrl: 'images/flag-g.png'}),
+    redIcon = new LeafIcon({iconUrl: 'images/flag-r.png'}),
+    orangeIcon = new LeafIcon({iconUrl: 'images/flag-y.png'});
+	
+		var nas_punkti1 = L.geoJSON(nas_punkti_json, {
+		pointToLayer: function (feature, latlng) {
+		
+			if (feature.properties.year_gp == null) {
+				var myicon = redIcon;
+				var msgGp = ("<h4>"+feature.properties.codename+" "+feature.properties.nameua_new+"</h4><br>"+"генеральний план не розроблявся");
+				} else if (feature.properties.year_gp < "2011"){
+					var myicon = orangeIcon;
+					var msgGp = ("<h4>"+feature.properties.codename+" "+feature.properties.nameua_new+"</h4><br>"+"рік розроблення: "+feature.properties.year_gp);
+					} else {
+						var myicon = greenIcon;
+						
+						msgGp = ("<h4>"+feature.properties.codename+" "+feature.properties.nameua_new+"</h4><br>"+"рік розроблення: "+feature.properties.year_gp+"<button id = 'click' onclick = 'myFunction(["+feature.geometry.coordinates[1]+", "+feature.geometry.coordinates[0]+"], 15);'>click me!</button>");
+						
+						
+						msgGp = ("<h4>"+feature.properties.codename+" "+feature.properties.nameua_new+"</h4><br>"+"рік розроблення: "+feature.properties.year_gp+"<button id = 'click' onclick = 'map.setView(["+feature.geometry.coordinates[1]+", "+feature.geometry.coordinates[0]+"], 15);'>click me!</button>");
+					}
+							
+        return L.marker(latlng, {icon: myicon}).bindPopup(msgGp);
+		}
+	});
+	function myFunction(mapParam){
+	document.getElementById("mymap").style.display = "block";
+	var mymap = L.map('mymap').setView(mapParam);
+	*/ 
+	
+/* Empty layer placeholder to add to layer control for listening when to add/remove gp to markerClusters layer */
+var gpLayer = L.geoJson(null);
+var gp = L.geoJson(null, {
+  pointToLayer: function (feature, latlng) {
+    return L.marker(latlng, {
+      icon: L.icon({
+        iconUrl:  "assets/img/gp.png",
+        iconSize: [24, 28],
+        iconAnchor: [12, 28],
+        popupAnchor: [0, -25]
+      }),
+      title: feature.properties.NAME,
+      riseOnHover: true
+    });
+  },
+  onEachFeature: function (feature, layer) {
+    if (feature.properties) {
+      var content = "<table class='table table-striped table-bordered table-condensed'>" + "<tr><th>Name</th><td>" + feature.properties.NAME + "</td></tr>" + "<tr><th>codename</th><td>" + feature.properties.codename + "</td></tr>" + "<tr><th>year</th><td>" + feature.properties.year_gp + "</td></tr><table>";
+      layer.on({
+        click: function (e) {
+          $("#feature-title").html(feature.properties.NAME);
+          $("#feature-info").html(content);
+          $("#featureModal").modal("show");
+          highlight.clearLayers().addLayer(L.circleMarker([feature.geometry.coordinates[1], feature.geometry.coordinates[0]], highlightStyle));
+        }
+      });
+      $("#feature-list tbody").append('<tr class="feature-row" id="' + L.stamp(layer) + '" lat="' + layer.getLatLng().lat + '" lng="' + layer.getLatLng().lng + '"><td style="vertical-align: middle;"><img width="16" height="18" src="assets/img/gp.png"></td><td class="feature-name">' + layer.feature.properties.NAME + '</td><td style="vertical-align: middle;"><i class="fa fa-chevron-right pull-right"></i></td></tr>');
+      gpSearch.push({
+        name: layer.feature.properties.NAME,
+        source: "gp",
+        id: L.stamp(layer),
+        lat: layer.feature.geometry.coordinates[1],
+        lng: layer.feature.geometry.coordinates[0]
+      });
+    }
+  }
+});
+$.getJSON("data/GP_t.geojson", function (data) {
+  gp.addData(data);
+  map.addLayer(gpLayer);
+});
 
 /* Empty layer placeholder to add to layer control for listening when to add/remove museums to markerClusters layer */
 var museumLayer = L.geoJson(null);
@@ -306,48 +395,7 @@ $.getJSON("data/DOITT_MUSEUM_01_13SEPT2010.geojson", function (data) {
   museums.addData(data);
 });
 
-/* Empty layer placeholder to add to layer control for listening when to add/remove theaters to markerClusters layer */
-var gpLayer = L.geoJson(null);
-var gp = L.geoJson(null, {
-  pointToLayer: function (feature, latlng) {
-    return L.marker(latlng, {
-      icon: L.icon({
-        iconUrl: "assets/img/theater.png",
-        iconSize: [24, 28],
-        iconAnchor: [12, 28],
-        popupAnchor: [0, -25]
-      }),
-      title: feature.properties.nameua_new,
-      riseOnHover: true
-    });
-  },
-  onEachFeature: function (feature, layer) {
-    if (feature.properties) {
-      var content = "<table class='table table-striped table-bordered table-condensed'>" + "<tr><th>Name</th><td>" + feature.properties.nameua_new + "</td></tr>" + "<tr><th>Phone</th><td>" + feature.properties.codename + "</td></tr>" + "<tr><th>Address</th><td>" + feature.properties.year_gp + "</td></tr><table>";
-      layer.on({
-        click: function (e) {
-          $("#feature-title").html(feature.properties.nameua_new);
-          $("#feature-info").html(content);
-          $("#featureModal").modal("show");
-          highlight.clearLayers().addLayer(L.circleMarker([feature.geometry.coordinates[1], feature.geometry.coordinates[0]], highlightStyle));
-        }
-      });
-      $("#feature-list tbody").append('<tr class="feature-row" id="' + L.stamp(layer) + '" lat="' + layer.getLatLng().lat + '" lng="' + layer.getLatLng().lng + '"><td style="vertical-align: middle;"><img width="16" height="18" src="assets/img/theater.png"></td><td class="feature-name">' + layer.feature.properties.nameua_new + '</td><td style="vertical-align: middle;"><i class="fa fa-chevron-right pull-right"></i></td></tr>');
-      theaterSearch.push({
-        name: layer.feature.properties.nameua_new,
-        address: layer.feature.properties.ADDRESS1,
-        source: "Theaters",
-        id: L.stamp(layer),
-        lat: layer.feature.geometry.coordinates[1],
-        lng: layer.feature.geometry.coordinates[0]
-      });
-    }
-  }
-});
-$.getJSON("data/GP_t.geojson", function (data) {
-  theaters.addData(data);
-  map.addLayer(gpLayer);
-});
+
 
 map = L.map("map", {
   zoom: 10,
@@ -367,6 +415,10 @@ map.on("overlayadd", function(e) {
     markerClusters.addLayer(museums);
     syncSidebar();
   }
+  if (e.layer === gpLayer) {
+    markerClusters.addLayer(gp);
+    syncSidebar();
+  }
 });
 
 map.on("overlayremove", function(e) {
@@ -376,6 +428,10 @@ map.on("overlayremove", function(e) {
   }
   if (e.layer === museumLayer) {
     markerClusters.removeLayer(museums);
+    syncSidebar();
+  }
+  if (e.layer === gpLayer) {
+    markerClusters.removeLayer(gp);
     syncSidebar();
   }
 });
@@ -462,7 +518,8 @@ var baseLayers = {
 var groupedOverlays = {
   "Points of Interest": {
     "<img src='assets/img/theater.png' width='24' height='28'>&nbsp;Theaters": theaterLayer,
-    "<img src='assets/img/museum.png' width='24' height='28'>&nbsp;Museums": museumLayer
+    "<img src='assets/img/museum.png' width='24' height='28'>&nbsp;Museums": museumLayer,
+    "<img src='assets/img/gp.png' width='24' height='28'>&nbsp;gp": gpLayer
   },
   "Reference": {
     "Boroughs": boroughs,
@@ -528,6 +585,15 @@ $(document).one("ajaxStop", function () {
     local: museumSearch,
     limit: 10
   });
+  var gpBH = new Bloodhound({
+    name: "gp",
+    datumTokenizer: function (d) {
+      return Bloodhound.tokenizers.whitespace(d.name);
+    },
+    queryTokenizer: Bloodhound.tokenizers.whitespace,
+    local: gpSearch,
+    limit: 10
+  });
 
   var geonamesBH = new Bloodhound({
     name: "GeoNames",
@@ -563,6 +629,7 @@ $(document).one("ajaxStop", function () {
   theatersBH.initialize();
   museumsBH.initialize();
   geonamesBH.initialize();
+  gpBH.initialize();
 
   /* instantiate the typeahead UI */
   $("#searchbox").typeahead({
@@ -599,6 +666,14 @@ $(document).one("ajaxStop", function () {
     templates: {
       header: "<h4 class='typeahead-header'><img src='assets/img/globe.png' width='25' height='25'>&nbsp;GeoNames</h4>"
     }
+  }, {
+    name: "gp",
+    displayKey: "name",
+    source: gpBH.ttAdapter(),
+    templates: {
+      header: "<h4 class='typeahead-header'><img src='assets/img/gp.png' width='25' height='25'>&nbsp;gp</h4>",
+      suggestion: Handlebars.compile(["{{name}}<br>&nbsp;<small>{{address}}</small>"].join(""))
+    }
   }).on("typeahead:selected", function (obj, datum) {
     if (datum.source === "Boroughs") {
       map.fitBounds(datum.bounds);
@@ -606,6 +681,15 @@ $(document).one("ajaxStop", function () {
     if (datum.source === "Theaters") {
       if (!map.hasLayer(theaterLayer)) {
         map.addLayer(theaterLayer);
+      }
+      map.setView([datum.lat, datum.lng], 17);
+      if (map._layers[datum.id]) {
+        map._layers[datum.id].fire("click");
+      }
+    }
+    if (datum.source === "gp") {
+      if (!map.hasLayer(gpLayer)) {
+        map.addLayer(gpLayer);
       }
       map.setView([datum.lat, datum.lng], 17);
       if (map._layers[datum.id]) {
