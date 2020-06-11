@@ -271,53 +271,25 @@ $.getJSON("data/DOITT_THEATER_01_13SEPT2010.geojson", function (data) {
   theaters.addData(data);
   map.addLayer(theaterLayer);
 });
-/*
-//Завантаження шарів з файлів geoJSON
-	var LeafIcon = L.Icon.extend({
-		options: {
-			iconSize:     [30, 40],
-			
-			popupAnchor:  [0, 0]
-		}
-	});
-	
-	var greenIcon = new LeafIcon({iconUrl: 'images/flag-g.png'}),
-    redIcon = new LeafIcon({iconUrl: 'images/flag-r.png'}),
-    orangeIcon = new LeafIcon({iconUrl: 'images/flag-y.png'});
-	
-		var nas_punkti1 = L.geoJSON(nas_punkti_json, {
-		pointToLayer: function (feature, latlng) {
-		
-			if (feature.properties.year_gp == null) {
-				var myicon = redIcon;
-				var msgGp = ("<h4>"+feature.properties.codename+" "+feature.properties.nameua_new+"</h4><br>"+"генеральний план не розроблявся");
-				} else if (feature.properties.year_gp < "2011"){
-					var myicon = orangeIcon;
-					var msgGp = ("<h4>"+feature.properties.codename+" "+feature.properties.nameua_new+"</h4><br>"+"рік розроблення: "+feature.properties.year_gp);
-					} else {
-						var myicon = greenIcon;
-						
-						msgGp = ("<h4>"+feature.properties.codename+" "+feature.properties.nameua_new+"</h4><br>"+"рік розроблення: "+feature.properties.year_gp+"<button id = 'click' onclick = 'myFunction(["+feature.geometry.coordinates[1]+", "+feature.geometry.coordinates[0]+"], 15);'>click me!</button>");
-						
-						
-						msgGp = ("<h4>"+feature.properties.codename+" "+feature.properties.nameua_new+"</h4><br>"+"рік розроблення: "+feature.properties.year_gp+"<button id = 'click' onclick = 'map.setView(["+feature.geometry.coordinates[1]+", "+feature.geometry.coordinates[0]+"], 15);'>click me!</button>");
-					}
-							
-        return L.marker(latlng, {icon: myicon}).bindPopup(msgGp);
-		}
-	});
-	function myFunction(mapParam){
-	document.getElementById("mymap").style.display = "block";
-	var mymap = L.map('mymap').setView(mapParam);
-	*/ 
-	
+
 /* Empty layer placeholder to add to layer control for listening when to add/remove gp to markerClusters layer */
 var gpLayer = L.geoJson(null);
 var gp = L.geoJson(null, {
   pointToLayer: function (feature, latlng) {
+    if (feature.properties.year_gp == null) {
+      var gpicon = "assets/img/gp_red.png";
+
+      } else if (feature.properties.year_gp < "2011"){
+        var gpicon = "assets/img/gp.png";
+
+        } else {
+          var gpicon = "assets/img/gp_green.png";
+
+
+        }
     return L.marker(latlng, {
       icon: L.icon({
-        iconUrl:  "assets/img/gp.png",
+        iconUrl:  gpicon,
         iconSize: [24, 28],
         iconAnchor: [12, 28],
         popupAnchor: [0, -25]
@@ -399,7 +371,7 @@ $.getJSON("data/DOITT_MUSEUM_01_13SEPT2010.geojson", function (data) {
 
 map = L.map("map", {
   zoom: 10,
-  center: [40.702222, -73.979378],
+  center: [49.23, 28.32],
   layers: [cartoLight, boroughs, markerClusters, highlight],
   zoomControl: false,
   attributionControl: false
