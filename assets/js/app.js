@@ -1,5 +1,7 @@
 var map, featureList, gpSearch = [], boroughSearch = [], theaterSearch = [], museumSearch = [];
 
+
+
 $(window).resize(function() {
   sizeLayerControl();
 });
@@ -103,6 +105,8 @@ function syncSidebar() {
   gp.eachLayer(function (layer) {
     if (map.hasLayer(gpLayer)) {
       if (map.getBounds().contains(layer.getLatLng())) {
+
+
         $("#feature-list tbody").append('<tr class="feature-row" id="' + L.stamp(layer) + '" lat="' + layer.getLatLng().lat + '" lng="' + layer.getLatLng().lng + '"><td style="vertical-align: middle;"><img width="16" height="18" src="assets/img/gp.png"></td><td class="feature-name">' + layer.feature.properties.NAME + '</td><td style="vertical-align: middle;"><i class="fa fa-chevron-right pull-right"></i></td></tr>');
       }
     }
@@ -269,7 +273,7 @@ var theaters = L.geoJson(null, {
 });
 $.getJSON("data/DOITT_THEATER_01_13SEPT2010.geojson", function (data) {
   theaters.addData(data);
-  map.addLayer(theaterLayer);
+  
 });
 
 /* Empty layer placeholder to add to layer control for listening when to add/remove gp to markerClusters layer */
@@ -370,8 +374,8 @@ $.getJSON("data/DOITT_MUSEUM_01_13SEPT2010.geojson", function (data) {
 
 
 map = L.map("map", {
-  zoom: 10,
-  center: [49.23, 28.32],
+  zoom: 8,
+  center: [48.7, 28.7],
   layers: [cartoLight, boroughs, markerClusters, highlight],
   zoomControl: false,
   attributionControl: false
@@ -524,9 +528,9 @@ $(document).one("ajaxStop", function () {
   $("#loading").hide();
   sizeLayerControl();
   /* Fit map to boroughs bounds */
-  map.fitBounds(boroughs.getBounds());
+  /*map.fitBounds(boroughs.getBounds());
   featureList = new List("features", {valueNames: ["feature-name"]});
-  featureList.sort("feature-name", {order:"asc"});
+  featureList.sort("feature-name", {order:"asc"}); */
 
   var boroughsBH = new Bloodhound({
     name: "Boroughs",

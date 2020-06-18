@@ -2,7 +2,7 @@
 "type": "FeatureCollection",
 "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
 "features": [
-{ "type": "Feature", "properties": { "koatuu": "0525087501", "": "Попова Гребля", "codename": "село", "year_gp": 1967 }, "geometry": { "type": "Point", "coordinates": [ 29.29354, 48.13269 ] } },
+{ "type": "Feature", "properties": { "koatuu": "0525087501", "NAME": "Попова Гребля", "codename": "село", "year_gp": 1967 }, "geometry": { "type": "Point", "coordinates": [ 29.29354, 48.13269 ] } },
 { "type": "Feature", "properties": { "koatuu": "0525087502", "NAME": "Новоукраїнка", "codename": "село", "year_gp": null }, "geometry": { "type": "Point", "coordinates": [ 29.35034, 48.10836 ] } },
 { "type": "Feature", "properties": { "koatuu": "0522487402", "NAME": "Лисогірка", "codename": "село", "year_gp": 1974 }, "geometry": { "type": "Point", "coordinates": [ 27.86891, 49.47292 ] } },
 { "type": "Feature", "properties": { "koatuu": "0522486804", "NAME": "Осічок", "codename": "село", "year_gp": 1980 }, "geometry": { "type": "Point", "coordinates": [ 27.76377, 49.45156 ] } },
